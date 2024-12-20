@@ -34,6 +34,7 @@ dataset/
 
 ---
 
+
 ## Step 2: Preprocess the Videos and Audio
 
 To make data loading easier, videos are converted to `.mp4` format, and audio is extracted as `.wav`. 
@@ -67,6 +68,8 @@ extracted_audio/
 ```
 
 ---
+
+manually put both these directories into one and rename to just video and audio and continue
 
 ## Step 3: Load the Dataset with PyTorch
 
