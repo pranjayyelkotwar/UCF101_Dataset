@@ -1,25 +1,25 @@
-# UCF101 Dataset Preparation and Usage
+# **UCF101 Dataset Preparation and Usage**
 
-This repository provides scripts and instructions to prepare and use the [UCF101 dataset](https://www.crcv.ucf.edu/data/UCF101.php) for multimodal machine learning tasks. Below are the steps to organize, preprocess, and load the dataset efficiently.
+This repository provides scripts and guidelines to organize, preprocess, and load the [UCF101 dataset](https://www.crcv.ucf.edu/data/UCF101.php) for multimodal machine learning tasks, such as video and audio analysis.
 
 ---
 
-## Download the Dataset
+## **Download the Dataset**
 
 1. Download the dataset from the [UCF101 official page](https://www.crcv.ucf.edu/data/UCF101/UCF101.rar).  
-2. Extract the downloaded files to your desired directory.
+2. Extract the `.rar` file into your preferred directory.
 
 ---
 
-## Step 1: Organize the Dataset
+## **Step 1: Organize the Dataset**
 
-The original dataset is split into `train`, `test`, and `val` directories, which can be inconvenient for certain workflows. To consolidate the data:
+The dataset is initially divided into `train`, `test`, and `val` splits, which might not be ideal for certain workflows. To merge all videos into a single directory:
 
-1. Run the script `move_data.py`:
-   - Update the `base_path` variable to point to the extracted dataset directory.
-   - Set the `output_path` variable to the desired output directory for consolidated data.
+1. **Run `move_data.py`:**
+   - Update the `base_path` variable to the path of the extracted dataset.
+   - Set the `output_path` variable to your desired output directory.
 
-### Expected Directory Structure After Running `move_data.py`:
+After running the script, the directory structure should look like this:
 
 ```
 dataset/
@@ -34,18 +34,17 @@ dataset/
 
 ---
 
+## **Step 2: Preprocess Videos and Audio**
 
-## Step 2: Preprocess the Videos and Audio
+To simplify dataset loading, videos are converted to `.mp4`, and audio is extracted as `.wav` files. Follow these steps:
 
-To make data loading easier, videos are converted to `.mp4` format, and audio is extracted as `.wav`. 
+1. **Run `convert_video.py`:**
+   - Update the following variables in the script:
+     - `input_dir`: Path to the dataset folder (e.g., `"dataset"`).
+     - `output_video_dir`: Directory for converted `.mp4` videos.
+     - `output_audio_dir`: Directory for extracted `.wav` audio files.
 
-Run the `convert_video.py` script:
-- Update the following variables in the script:
-  - `input_dir`: Path to the folder containing videos (e.g., `"dataset"`).
-  - `output_video_dir`: Path for storing the converted `.mp4` videos.
-  - `output_audio_dir`: Path for storing extracted `.wav` audio files.
-
-### Directory Structure After Conversion:
+2. After running the script, you will have the following directory structure:
 
 ```
 converted_videos/
@@ -67,20 +66,26 @@ extracted_audio/
   ...
 ```
 
+3. **Manually merge the directories:**
+   - Combine `converted_videos` and `extracted_audio` into a single directory:
+     ```
+     final_dataset/
+       ├── video/
+       ├── audio/
+     ```
+
 ---
 
-manually put both these directories into one and rename to just video and audio and continue
+## **Step 3: Load the Dataset with PyTorch**
 
-## Step 3: Load the Dataset with PyTorch
+The `UCF101MultimodalDataset` class in `dataset_class.py` enables efficient data loading for video and audio inputs.
 
-To simplify data loading for machine learning tasks, use the `UCF101MultimodalDataset` class provided in `dataset_class.py`. 
-
-### Features:
-- Supports loading both video and audio modalities.
-- Samples a fixed number of frames from each video.
+### **Features:**
+- Samples a fixed number of frames per video.
 - Converts audio to spectrograms and normalizes them.
+- Returns video frames, audio spectrograms, labels, and video IDs.
 
-### Example Usage:
+### **Example Usage:**
 
 ```python
 from dataset_class import UCF101MultimodalDataset
@@ -93,21 +98,25 @@ sample = dataset[3]
 video, audio, label, id = sample["video"], sample["audio"], sample["label"], sample["id"]
 
 # Print shapes and metadata
-print("Video shape:", video.shape)  # e.g., torch.Size([8, 3, 224, 224])
-print("Audio shape:", audio.shape)  # e.g., torch.Size([128, 346])
-print("Label:", label)              # e.g., 0
-print("ID:", id)                    # e.g., v_BalanceBeam_g23_c03
+print("Video shape:", video.shape)  # Example: torch.Size([8, 3, 224, 224])
+print("Audio shape:", audio.shape)  # Example: torch.Size([128, 346])
+print("Label:", label)              # Example: 0
+print("ID:", id)                    # Example: v_BalanceBeam_g23_c03
 ```
 
 ---
 
-## Additional Notes
+## **Step 4: Handle Variable Audio Sizes**
 
-1. **Dependencies:** Ensure the following Python libraries are installed:
-   - `torch`, `torchvision`, `torchaudio`
-   - `moviepy`, `tqdm`
-2. **Customization:** 
-   - Modify `num_frames_per_clip` in the dataset class to change the number of frames sampled per video.
-   - Update transformations for both video and audio as needed for your model.
+Due to variable audio sizes, standard PyTorch dataloaders may encounter issues. To address this, use the custom `collate_fn` provided in `utils.py` when creating the dataloader.
 
 ---
+
+## **Summary**
+
+This repository streamlines the preparation of the UCF101 dataset for multimodal tasks. Follow the steps to:
+1. Consolidate the dataset structure.
+2. Preprocess video and audio files.
+3. Efficiently load data using PyTorch.
+
+With these tools, you can easily integrate UCF101 into your machine learning pipelines. 
